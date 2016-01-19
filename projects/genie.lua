@@ -13,7 +13,7 @@ newaction {
 					local DEST_DIR = "../../LumixEngine/external"
 					local IDE_DIR = "vs2013/"
 					function c(ext)
-						os.copyfile (path.join(BINARY_DIR, PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
+						os.copyfile(path.join(BINARY_DIR, PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
 							path.join(DEST_DIR, lib .. "/lib/" .. IDE_DIR .. PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext))
 					end
 					c(".pdb")
@@ -29,6 +29,7 @@ newaction {
 		
 		copyLib("lua")
 		copyLib("bgfx")
+		copyLib("crnlib")
 	end
 }
 
@@ -52,12 +53,14 @@ function defaultConfigurations()
 		targetdir(BINARY_DIR .. "win32/Release")
 		defines { "NDEBUG" }
 		flags { "Optimize", "WinMain" }
+		
+	configuration {}
 end
 
 solution "LumixEngine_3rdparty"
 	configurations { "Debug", "Release", "RelWithDebInfo" }
 	platforms { "x32", "x64" }
-	flags { "FatalWarnings", "NoPCH" }
+	flags { "NoPCH" }
 	location "tmp"
 	language "C++"
 
@@ -67,6 +70,15 @@ project "lua"
 	files { "../3rdparty/lua/src/**.h", "../3rdparty/lua/src/**.c", "genie.lua" }
 	excludes { "../3rdparty/lua/src/luac.c", "../3rdparty/lua/src/lua.c" }
 
+	defaultConfigurations()
+
+project "crnlib"
+	kind "StaticLib"
+
+	files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
+	excludes { "../3rdparty/crunch/crnlib/lzham*" }
+
+	defines { "WIN32", "_LIB" }
 	defaultConfigurations()
 
 project ("bgfx" )
