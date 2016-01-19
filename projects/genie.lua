@@ -1,5 +1,6 @@
-local BINARY_DIR = "tmp/bin/"
-local ide_dir = iif(_ACTION == nil, "vs2013", _ACTION)
+local IDE = iif(_ACTION == nil, "vs2013", _ACTION)
+local LOCATION = "tmp/" .. IDE
+local BINARY_DIR = path.join(LOCATION, "bin") .. "/"
 
 newaction {
 	trigger = "install",
@@ -7,20 +8,21 @@ newaction {
 	execute = function()
 		function copyLib(lib)
 			function copyConf(lib, configuration)
-				function copyPlatform(lib, configuration, platform)
+				function copyPlatform(lib, configuration, platform, ide)
 					local PLATFORM_DIR = platform .. "/"
 					local CONFIGURATION_DIR = configuration .. "/"
 					local DEST_DIR = "../../LumixEngine/external"
-					local IDE_DIR = "vs2013/"
 					function c(ext)
-						os.copyfile(path.join(BINARY_DIR, PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
-							path.join(DEST_DIR, lib .. "/lib/" .. IDE_DIR .. PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext))
+						os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
+							path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib .. ext))
 					end
 					c(".pdb")
 					c(".lib")
 				end
-				copyPlatform(lib, configuration, "win32");
-				copyPlatform(lib, configuration, "win64");
+				copyPlatform(lib, configuration, "win32", "vs2013");
+				copyPlatform(lib, configuration, "win64", "vs2013");
+				copyPlatform(lib, configuration, "win32", "vs2015");
+				copyPlatform(lib, configuration, "win64", "vs2015");
 			end
 			
 			copyConf(lib, "release")
@@ -30,6 +32,21 @@ newaction {
 		copyLib("lua")
 		copyLib("bgfx")
 		copyLib("crnlib")
+		
+		--os.execute("mkdir \"../../LumixEngine/external/bgfx/include\"")
+		os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
+
+		--os.execute("mkdir \"../../LumixEngine/external/lua/include\"")
+		os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
+		os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
+		os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
+		os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
+		os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
+
+		--os.execute("mkdir \"../../LumixEngine/external/crnlib/include\"")
+		os.copyfile("../3rdparty/crunch/inc/crn_decomp.h", "../../LumixEngine/external/crnlib/include/crn_decomp.h");
+		os.copyfile("../3rdparty/crunch/inc/crnlib.h", "../../LumixEngine/external/crnlib/include/crnlib.h");
+		os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
 	end
 }
 
@@ -61,7 +78,7 @@ solution "LumixEngine_3rdparty"
 	configurations { "Debug", "Release", "RelWithDebInfo" }
 	platforms { "x32", "x64" }
 	flags { "NoPCH" }
-	location "tmp"
+	location(LOCATION) 
 	language "C++"
 
 project "lua"
@@ -89,9 +106,6 @@ project ("bgfx" )
 
 	configuration {}
 	BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
-
-	local BGFX_BUILD_DIR = path.join(BGFX_DIR, ".build")
-	local BGFX_THIRD_PARTY_DIR = path.join(BGFX_DIR, "3rdparty")
 	local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 
 	flags {
@@ -111,7 +125,6 @@ project ("bgfx" )
 		"WIN32",
 		"_WIN32",
 		"_HAS_EXCEPTIONS=0",
-		"_HAS_ITERATOR_DEBUGGING=0",
 		"_SCL_SECURE=0",
 		"_SECURE_SCL=0",
 		"_SCL_SECURE_NO_WARNINGS",
@@ -126,7 +139,6 @@ project ("bgfx" )
 	linkoptions {
 		"/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
 	}
-
 
 	includedirs {
 		path.join(BX_DIR, "include/compat/msvc"),
