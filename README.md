@@ -1,5 +1,5 @@
 # LumixEngine - 3rd party libraries
-Source of 3rd party libraries for LumixEngine
+Source of 3rd party libraries for [Lumix Engine](https://github.com/nem0/LumixEngine)
 
 3rd party libraries in this repository:
 
