@@ -6,32 +6,41 @@ newaction {
 	trigger = "install",
 	description = "Install in ../../LumixEngine/external",
 	execute = function()
-		function copyLib(lib)
-			function copyConf(lib, configuration)
-				function copyPlatform(lib, configuration, platform, ide)
+		function copyLibrary(lib, copy_dll)
+			function copyConf(lib, configuration, copy_dll)
+				function copyPlatform(lib, configuration, platform, ide, copy_dll)
 					local PLATFORM_DIR = platform .. "/"
 					local CONFIGURATION_DIR = configuration .. "/"
 					local DEST_DIR = "../../LumixEngine/external"
-					function c(ext)
+					function copyLibPdb(ext)
 						os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
 							path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib .. ext))
 					end
-					c(".pdb")
-					c(".lib")
+					function copyDll()
+						local ext = ".dll"
+						os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
+							path.join(DEST_DIR, lib .. "/dll/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib .. ext))
+					end
+					copyLibPdb(".pdb")
+					copyLibPdb(".lib")
+					if copy_dll then	
+						copyDll()
+					end
 				end
-				copyPlatform(lib, configuration, "win32", "vs2013");
-				copyPlatform(lib, configuration, "win64", "vs2013");
-				copyPlatform(lib, configuration, "win32", "vs2015");
-				copyPlatform(lib, configuration, "win64", "vs2015");
+				copyPlatform(lib, configuration, "win32", "vs2013", copy_dll);
+				copyPlatform(lib, configuration, "win64", "vs2013", copy_dll);
+				copyPlatform(lib, configuration, "win32", "vs2015", copy_dll);
+				copyPlatform(lib, configuration, "win64", "vs2015", copy_dll);
 			end
 			
-			copyConf(lib, "release")
-			copyConf(lib, "debug")
+			copyConf(lib, "release", copy_dll)
+			copyConf(lib, "debug", copy_dll)
 		end
 		
-		copyLib("lua")
-		copyLib("bgfx")
-		copyLib("crnlib")
+		copyLibrary("lua", false)
+		copyLibrary("bgfx", false)
+		copyLibrary("crnlib", false)
+		copyLibrary("assimp", true)
 		
 		--os.execute("mkdir \"../../LumixEngine/external/bgfx/include\"")
 		os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
@@ -47,6 +56,9 @@ newaction {
 		os.copyfile("../3rdparty/crunch/inc/crn_decomp.h", "../../LumixEngine/external/crnlib/include/crn_decomp.h");
 		os.copyfile("../3rdparty/crunch/inc/crnlib.h", "../../LumixEngine/external/crnlib/include/crnlib.h");
 		os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
+
+		os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
+		
 	end
 }
 
@@ -98,6 +110,37 @@ project "crnlib"
 	defines { "WIN32", "_LIB" }
 	defaultConfigurations()
 
+project "assimp"
+	kind "SharedLib"
+	files { "../3rdparty/assimp/code/**.h"
+		, "../3rdparty/assimp/code/**.cpp"
+		, "../3rdparty/assimp/include/**.h"
+		, "../3rdparty/assimp/contrib/**.c"
+		, "../3rdparty/assimp/contrib/**.cpp"
+		, "../3rdparty/assimp/contrib/**.cc"
+		, "../3rdparty/assimp/contrib/**.h"
+		, "genie.lua" 
+	}
+	includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
+		, "../3rdparty/assimp/include"
+		, "../3rdparty/assimp/contrib/rapidjson/include"
+		, "../3rdparty/assimp/contrib/openddlparser/include"
+		, "../3rdparty/assimp/contrib/unzip"
+		, "../3rdparty/assimp/contrib/zlib"
+	}
+	defines {
+		"OPENDDL_NO_USE_CPP11",
+		"ASSIMP_BUILD_BOOST_WORKAROUND",
+		"ASSIMP_BUILD_NO_C4D_IMPORTER",
+		"ASSIMP_BUILD_DLL_EXPORT",
+		"OPENDDLPARSER_BUILD",
+		"assimp_EXPORTS",
+		"_SCL_SECURE_NO_WARNINGS",
+		"_CRT_SECURE_NO_WARNINGS"
+	}	
+		
+	defaultConfigurations()
+	
 project ("bgfx" )
 	uuid (os.uuid("bgfx"))
 	kind "StaticLib"

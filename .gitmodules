@@ -10,3 +10,6 @@
 [submodule "3rdparty/crunch"]
 	path = 3rdparty/crunch
 	url = https://github.com/richgel999/crunch
+[submodule "3rdparty/assimp"]
+	path = 3rdparty/assimp
+	url = https://github.com/assimp/assimp

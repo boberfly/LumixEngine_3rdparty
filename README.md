@@ -6,6 +6,7 @@ Source of 3rd party libraries for [Lumix Engine](https://github.com/nem0/LumixEn
 * [bgfx](https://github.com/bkaradzic/bgfx)
 * [lua](https://github.com/LuaDist/lua)
 * [crunch](https://github.com/richgel999/crunch)
+* [assimp](https://github.com/assimp/assimp)
 
 The 3rd party libraries are git submodules.
 
