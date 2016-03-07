@@ -38,6 +38,7 @@ newaction {
 		end
 		
 		copyLibrary("lua", false)
+		copyLibrary("recast", false)
 		copyLibrary("bgfx", false)
 		copyLibrary("crnlib", false)
 		copyLibrary("assimp", true)
@@ -58,6 +59,9 @@ newaction {
 		os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
 
 		os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
+
+		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+		os.execute("xcopy \"../3rdparty/recastnavigation/Recast/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 		
 	end
 }
@@ -101,6 +105,25 @@ project "lua"
 
 	defaultConfigurations()
 
+
+project "recast"
+	kind "StaticLib"
+
+	defines { "_CRT_SECURE_NO_WARNINGS" }
+	
+	includedirs { "../3rdparty/recastnavigation/Recast/include"
+		, "../3rdparty/recastnavigation/Detour/include"
+	}
+
+	files { "../3rdparty/recastnavigation/Recast/**.h"
+		, "../3rdparty/recastnavigation/Recast/**.cpp"
+		, "../3rdparty/recastnavigation/Detour/**.h"
+		, "../3rdparty/recastnavigation/Detour/**.cpp"
+		, "genie.lua" }
+
+	defaultConfigurations()
+	
+	
 project "crnlib"
 	kind "StaticLib"
 
