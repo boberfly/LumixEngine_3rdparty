@@ -13,3 +13,6 @@
 [submodule "3rdparty/assimp"]
 	path = 3rdparty/assimp
 	url = https://github.com/assimp/assimp
+[submodule "3rdparty/recastnavigation"]
+	path = 3rdparty/recastnavigation
+	url = https://github.com/recastnavigation/recastnavigation.git
