@@ -61,7 +61,8 @@ newaction {
 		os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
 
 		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		os.execute("xcopy \"../3rdparty/recastnavigation/Recast/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+		os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+		os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 		
 	end
 }
@@ -113,12 +114,18 @@ project "recast"
 	
 	includedirs { "../3rdparty/recastnavigation/Recast/include"
 		, "../3rdparty/recastnavigation/Detour/include"
+		, "../3rdparty/recastnavigation/DebugUtils/include"
+		, "../3rdparty/recastnavigation/DetourTileCache/include"
 	}
 
 	files { "../3rdparty/recastnavigation/Recast/**.h"
 		, "../3rdparty/recastnavigation/Recast/**.cpp"
 		, "../3rdparty/recastnavigation/Detour/**.h"
 		, "../3rdparty/recastnavigation/Detour/**.cpp"
+		, "../3rdparty/recastnavigation/DebugUtils/**.h"
+		, "../3rdparty/recastnavigation/DebugUtils/**.cpp"
+		, "../3rdparty/recastnavigation/DetourTileCache/**.h"
+		, "../3rdparty/recastnavigation/DetourTileCache/**.cpp"
 		, "genie.lua" }
 
 	defaultConfigurations()
