@@ -153,6 +153,7 @@ project "assimp"
 	}
 	includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
 		, "../3rdparty/assimp/include"
+		, "../misc/assimp"
 		, "../3rdparty/assimp/contrib/rapidjson/include"
 		, "../3rdparty/assimp/contrib/openddlparser/include"
 		, "../3rdparty/assimp/contrib/unzip"
