@@ -68,26 +68,32 @@ newaction {
 }
 
 function defaultConfigurations()
-	configuration {"x64", "Debug" }
-		targetdir(BINARY_DIR .. "win64/Debug")
+	configuration "Debug"
 		defines { "DEBUG" }
-		flags { "Symbols", "WinMain" }
-
-	configuration {"x32", "Debug" }
-		targetdir(BINARY_DIR .. "win32/Debug")
-		defines { "DEBUG" }
-		flags { "Symbols", "WinMain" }
-
-	configuration {"x64", "Release"}
-		targetdir(BINARY_DIR .. "win64/Release")
+	configuration "Release"
 		defines { "NDEBUG" }
-		flags { "Optimize", "WinMain" }
+	configuration {}
 
-	configuration { "x32", "Release" }
-		targetdir(BINARY_DIR .. "win32/Release")
-		defines { "NDEBUG" }
+	configuration {"Debug", "windows"}
+		flags { "Symbols", "WinMain" }
+	configuration {"Release", "windows"}
 		flags { "Optimize", "WinMain" }
-		
+	configuration {}
+
+	local platforms = {
+		windows = {x64 = "win64", x32 = "win32"},
+		linux = {x64 = "linux64", x32 = "linux32"},
+	}
+	for _, platform_bit in ipairs({ "x64", "x32" }) do
+		for platform, platform_dirs in pairs(platforms) do
+			local platform_dir = platform_dirs[platform_bit]
+			configuration {platform_bit, platform, "Debug"}
+				targetdir(BINARY_DIR .. platform_dir .. "/debug")
+			configuration {platform_bit, platform, "Release"}
+				targetdir(BINARY_DIR .. platform_dir .. "/release")
+		end
+	end
+
 	configuration {}
 end
 
