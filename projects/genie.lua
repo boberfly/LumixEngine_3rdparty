@@ -63,20 +63,16 @@ newaction {
 		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 		os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 		os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		
+
 	end
 }
 
 function defaultConfigurations()
 	configuration "Debug"
 		defines { "DEBUG" }
+		flags { "Symbols", "WinMain" }
 	configuration "Release"
 		defines { "NDEBUG" }
-	configuration {}
-
-	configuration {"Debug", "windows"}
-		flags { "Symbols", "WinMain" }
-	configuration {"Release", "windows"}
 		flags { "Optimize", "WinMain" }
 	configuration {}
 
@@ -135,15 +131,28 @@ project "recast"
 		, "genie.lua" }
 
 	defaultConfigurations()
-	
-	
+
+
 project "crnlib"
 	kind "StaticLib"
 
 	files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
 	excludes { "../3rdparty/crunch/crnlib/lzham*" }
 
-	defines { "WIN32", "_LIB" }
+	configuration "windows"
+		defines { "WIN32", "_LIB" }
+		excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
+	configuration "not windows"
+		excludes {
+			"../3rdparty/crunch/crnlib/crn_threading_win32.*",
+			"../3rdparty/crunch/crnlib/lzma_Threads.cpp",
+			"../3rdparty/crunch/crnlib/lzma_LzFindMt.cpp",
+		}
+		buildoptions { "-fomit-frame-pointer", "-ffast-math", "-fno-math-errno", "-fno-strict-aliasing" }
+	configuration {"not windows", "Debug"}
+		defines { "_DEBUG" }
+	configuration {}
+
 	defaultConfigurations()
 
 project "assimp"

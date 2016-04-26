@@ -9,7 +9,7 @@
 	url = https://github.com/bkaradzic/bx.git
 [submodule "3rdparty/crunch"]
 	path = 3rdparty/crunch
-	url = https://github.com/richgel999/crunch
+	url = https://github.com/nem0/crunch.git
 [submodule "3rdparty/assimp"]
 	path = 3rdparty/assimp
 	url = https://github.com/assimp/assimp
