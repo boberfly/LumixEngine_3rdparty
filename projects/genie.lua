@@ -74,6 +74,48 @@ newaction {
 	end
 }
 
+newaction {
+	trigger = "install-emscripten",
+	description = "Install in ../../LumixEngine/external",
+	execute = function()
+		function copyLibrary(lib)
+			function copyConf(lib, configuration)
+				function copyPlatform(lib, configuration, platform, ide)
+					local PLATFORM_DIR = platform .. "/"
+					local CONFIGURATION_DIR = configuration .. "/"
+					local DEST_DIR = "../../LumixEngine/external"
+					--os.execute("mkdir \"".. path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib) .. "\"")
+					
+					print("from" .. path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
+					print("to" .. path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
+					os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"),
+						path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
+				end
+				copyPlatform(lib, configuration, "win32", "gmake");
+			end
+			
+			copyConf(lib, "release")
+			copyConf(lib, "debug")
+		end
+		
+		copyLibrary("lua")
+		copyLibrary("recast")
+		copyLibrary("bgfx")
+		
+		os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
+
+		os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
+		os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
+		os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
+		os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
+		os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
+
+		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+		os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+		os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	end
+}
+
 function defaultConfigurations()
 	configuration "Debug"
 		defines { "DEBUG" }
