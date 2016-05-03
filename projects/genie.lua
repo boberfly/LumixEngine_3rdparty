@@ -1,4 +1,4 @@
-local IDE = iif(_ACTION == nil, "vs2013", _ACTION)
+local IDE = iif(_ACTION == nil, "vs2015", _ACTION)
 local LOCATION = "tmp/" .. IDE
 local BINARY_DIR = path.join(LOCATION, "bin") .. "/"
 
@@ -27,8 +27,6 @@ newaction {
 						copyDll()
 					end
 				end
-				copyPlatform(lib, configuration, "win32", "vs2013", copy_dll);
-				copyPlatform(lib, configuration, "win64", "vs2013", copy_dll);
 				copyPlatform(lib, configuration, "win32", "vs2015", copy_dll);
 				copyPlatform(lib, configuration, "win64", "vs2015", copy_dll);
 			end
