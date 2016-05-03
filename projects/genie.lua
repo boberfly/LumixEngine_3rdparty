@@ -2,6 +2,15 @@ local IDE = iif(_ACTION == nil, "vs2015", _ACTION)
 local LOCATION = "tmp/" .. IDE
 local BINARY_DIR = path.join(LOCATION, "bin") .. "/"
 
+newoption {
+		trigger = "gcc",
+		value = "GCC",
+		description = "Choose GCC flavor",
+		allowed = {
+			{ "asmjs",           "Emscripten/asm.js"          }
+		}
+	}
+
 newaction {
 	trigger = "install",
 	description = "Install in ../../LumixEngine/external",
@@ -98,6 +107,23 @@ solution "LumixEngine_3rdparty"
 	location(LOCATION) 
 	language "C++"
 
+	if _ACTION == "gmake" then
+		if "asmjs" == _OPTIONS["gcc"] then
+
+			if not os.getenv("EMSCRIPTEN") then
+				print("Set EMSCRIPTEN enviroment variable.")
+			end
+			premake.gcc.cc   = "\"$(EMSCRIPTEN)/emcc\""
+			premake.gcc.cxx  = "\"$(EMSCRIPTEN)/em++\""
+			premake.gcc.ar   = "\"$(EMSCRIPTEN)/emar\""
+			_G["premake"].gcc.llvm = true
+			premake.gcc.llvm = true
+			LOCATION = "tmp/gmake"
+			BINARY_DIR = LOCATION .. "/bin/"
+		end
+	end
+
+	
 project "lua"
 	kind "StaticLib"
 
@@ -130,61 +156,64 @@ project "recast"
 
 	defaultConfigurations()
 
+if _ACTION ~= "gmake" then
+	
+	project "crnlib"
+		kind "StaticLib"
 
-project "crnlib"
-	kind "StaticLib"
-
-	files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
-	excludes { "../3rdparty/crunch/crnlib/lzham*" }
+		files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
+		excludes { "../3rdparty/crunch/crnlib/lzham*" }
 
 	configuration "windows"
-		defines { "WIN32", "_LIB" }
-		excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
-	configuration "not windows"
-		excludes {
-			"../3rdparty/crunch/crnlib/crn_threading_win32.*",
-			"../3rdparty/crunch/crnlib/lzma_Threads.cpp",
-			"../3rdparty/crunch/crnlib/lzma_LzFindMt.cpp",
-		}
-		buildoptions { "-fomit-frame-pointer", "-ffast-math", "-fno-math-errno", "-fno-strict-aliasing" }
-	configuration {"not windows", "Debug"}
-		defines { "_DEBUG" }
-	configuration {}
-
-	defaultConfigurations()
-
-project "assimp"
-	kind "SharedLib"
-	files { "../3rdparty/assimp/code/**.h"
-		, "../3rdparty/assimp/code/**.cpp"
-		, "../3rdparty/assimp/include/**.h"
-		, "../3rdparty/assimp/contrib/**.c"
-		, "../3rdparty/assimp/contrib/**.cpp"
-		, "../3rdparty/assimp/contrib/**.cc"
-		, "../3rdparty/assimp/contrib/**.h"
-		, "genie.lua" 
-	}
-	includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
-		, "../3rdparty/assimp/include"
-		, "../misc/assimp"
-		, "../3rdparty/assimp/contrib/rapidjson/include"
-		, "../3rdparty/assimp/contrib/openddlparser/include"
-		, "../3rdparty/assimp/contrib/unzip"
-		, "../3rdparty/assimp/contrib/zlib"
-	}
-	defines {
-		"OPENDDL_NO_USE_CPP11",
-		"ASSIMP_BUILD_BOOST_WORKAROUND",
-		"ASSIMP_BUILD_NO_C4D_IMPORTER",
-		"ASSIMP_BUILD_DLL_EXPORT",
-		"OPENDDLPARSER_BUILD",
-		"assimp_EXPORTS",
-		"_SCL_SECURE_NO_WARNINGS",
-		"_CRT_SECURE_NO_WARNINGS"
-	}	
+			defines { "WIN32", "_LIB" }
+			excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
+		configuration "not windows"
+			excludes {
+				"../3rdparty/crunch/crnlib/crn_threading_win32.*",
+				"../3rdparty/crunch/crnlib/lzma_Threads.cpp",
+				"../3rdparty/crunch/crnlib/lzma_LzFindMt.cpp",
+			}
+			buildoptions { "-fomit-frame-pointer", "-ffast-math", "-fno-math-errno", "-fno-strict-aliasing" }
+		configuration {"not windows", "Debug"}
+			defines { "_DEBUG" }
+		configuration {}
 		
-	defaultConfigurations()
-	
+		defaultConfigurations()
+
+	project "assimp"
+		kind "SharedLib"
+		files { "../3rdparty/assimp/code/**.h"
+			, "../3rdparty/assimp/code/**.cpp"
+			, "../3rdparty/assimp/include/**.h"
+			, "../3rdparty/assimp/contrib/**.c"
+			, "../3rdparty/assimp/contrib/**.cpp"
+			, "../3rdparty/assimp/contrib/**.cc"
+			, "../3rdparty/assimp/contrib/**.h"
+			, "genie.lua" 
+		}
+		includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
+			, "../3rdparty/assimp/include"
+			, "../misc/assimp"
+			, "../3rdparty/assimp/contrib/rapidjson/include"
+			, "../3rdparty/assimp/contrib/openddlparser/include"
+			, "../3rdparty/assimp/contrib/unzip"
+			, "../3rdparty/assimp/contrib/zlib"
+		}
+		defines {
+			"OPENDDL_NO_USE_CPP11",
+			"ASSIMP_BUILD_BOOST_WORKAROUND",
+			"ASSIMP_BUILD_NO_C4D_IMPORTER",
+			"ASSIMP_BUILD_DLL_EXPORT",
+			"OPENDDLPARSER_BUILD",
+			"assimp_EXPORTS",
+			"_SCL_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_WARNINGS"
+		}	
+			
+		defaultConfigurations()
+
+end
+
 project ("bgfx" )
 	uuid (os.uuid("bgfx"))
 	kind "StaticLib"
@@ -203,39 +232,42 @@ project ("bgfx" )
 		"Symbols"
 	}
 
-	buildoptions {
-		"/Oy-",
-		"/Ob2"
-	}
+		buildoptions {
+			"/Oy-",
+			"/Ob2"
+		}
 
-	defines {
-		"WIN32",
-		"_WIN32",
-		"_HAS_EXCEPTIONS=0",
-		"_SCL_SECURE=0",
-		"_SECURE_SCL=0",
-		"_SCL_SECURE_NO_WARNINGS",
-		"_CRT_SECURE_NO_WARNINGS",
-		"_CRT_SECURE_NO_DEPRECATE",
-		"__STDC_LIMIT_MACROS",
-		"__STDC_FORMAT_MACROS",
-		"__STDC_CONSTANT_MACROS",
-		"BX_CONFIG_ENABLE_MSVC_LEVEL4_WARNINGS=1"
-	}
+		defines {
+			"WIN32",
+			"_WIN32",
+			"_HAS_EXCEPTIONS=0",
+			"_SCL_SECURE=0",
+			"_SECURE_SCL=0",
+			"_SCL_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"__STDC_LIMIT_MACROS",
+			"__STDC_FORMAT_MACROS",
+			"__STDC_CONSTANT_MACROS",
+			"BX_CONFIG_ENABLE_MSVC_LEVEL4_WARNINGS=1"
+		}
 
-	linkoptions {
-		"/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
-	}
+		linkoptions {
+			"/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+		}
 
+		includedirs {
+			path.join(BX_DIR, "include/compat/msvc"),
+			path.join(BGFX_DIR, "3rdparty/dxsdk/include"),
+		}
+		
+	configuration {}
+
+	
+	
 	includedirs {
-		path.join(BX_DIR, "include/compat/msvc"),
 		path.join(BGFX_DIR, "3rdparty"),
-		path.join(BGFX_DIR, "3rdparty/dxsdk/include"),
 		path.join(BGFX_DIR, "../bx/include"),
-	}
-
-
-	includedirs {
 		path.join(BGFX_DIR, "3rdparty/khronos"),
 		path.join(BGFX_DIR, "include")
 	}
