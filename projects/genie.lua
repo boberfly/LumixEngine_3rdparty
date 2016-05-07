@@ -7,7 +7,8 @@ newoption {
 		value = "GCC",
 		description = "Choose GCC flavor",
 		allowed = {
-			{ "asmjs",           "Emscripten/asm.js"          }
+			{ "asmjs",           "Emscripten/asm.js"          },
+			{ "android-x86",     "Android - x86"              }
 		}
 	}
 
@@ -143,13 +144,77 @@ function defaultConfigurations()
 end
 
 solution "LumixEngine_3rdparty"
-	configurations { "Debug", "Release", "RelWithDebInfo" }
-	platforms { "x32", "x64" }
-	flags { "NoPCH" }
-	location(LOCATION) 
-	language "C++"
-
 	if _ACTION == "gmake" then
+	
+		configuration { "android-*" }
+			flags {
+				"NoImportLib",
+			}
+			includedirs {
+				"$(ANDROID_NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/include",
+				"$(ANDROID_NDK_ROOT)/sources/android/native_app_glue",
+			}
+			linkoptions {
+				"-nostdlib",
+				"-static-libgcc",
+			}
+			links {
+				"c",
+				"dl",
+				"m",
+				"android",
+				"log",
+				"gnustl_static",
+				"gcc",
+			}
+			buildoptions {
+				"-fPIC",
+				"-no-canonical-prefixes",
+				"-Wa,--noexecstack",
+				"-fstack-protector",
+				"-ffunction-sections",
+				"-Wno-psabi",
+				"-Wunused-value",
+				"-Wundef",
+			}
+			buildoptions_cpp {
+				"-std=c++0x",
+			}
+			linkoptions {
+				"-no-canonical-prefixes",
+				"-Wl,--no-undefined",
+				"-Wl,-z,noexecstack",
+				"-Wl,-z,relro",
+				"-Wl,-z,now",
+			}
+		
+		configuration { "android-x86" }
+			androidPlatform = "android-24"
+			libdirs {
+				path.join(_libDir, "lib/android-x86"),
+				"$(ANDROID_NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86",
+			}
+			includedirs {
+				"$(ANDROID_NDK_ROOT)/sources/cxx-stl/gnu-libstdc++/4.9/libs/x86/include",
+			}
+			buildoptions {
+				"--sysroot=" .. path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-x86"),
+				"-march=i686",
+				"-mtune=atom",
+				"-mstackrealign",
+				"-msse3",
+				"-mfpmath=sse",
+				"-Wunused-value",
+				"-Wundef",
+			}
+			linkoptions {
+				"--sysroot=" .. path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-x86"),
+				path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "arch-x86/usr/lib/crtbegin_so.o"),
+				path.join("$(ANDROID_NDK_ROOT)/platforms", androidPlatform, "/arch-x86/usr/lib/crtend_so.o"),
+			}
+		configuration {}			
+			
+	
 		if "asmjs" == _OPTIONS["gcc"] then
 
 			if not os.getenv("EMSCRIPTEN") then
@@ -158,14 +223,51 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.cc   = "\"$(EMSCRIPTEN)/emcc\""
 			premake.gcc.cxx  = "\"$(EMSCRIPTEN)/em++\""
 			premake.gcc.ar   = "\"$(EMSCRIPTEN)/emar\""
-			_G["premake"].gcc.llvm = true
 			premake.gcc.llvm = true
 			LOCATION = "tmp/gmake"
-			BINARY_DIR = LOCATION .. "/bin/"
+		elseif "android-arm" == _OPTIONS["gcc"] then
+
+			if not os.getenv("ANDROID_NDK_ARM") or not os.getenv("ANDROID_NDK_ROOT") then
+				print("Set ANDROID_NDK_ARM and ANDROID_NDK_ROOT envrionment variables.")
+			end
+
+			premake.gcc.cc  = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-gcc\""
+			premake.gcc.cxx = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-g++\""
+			premake.gcc.ar  = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-ar\""
+			LOCATION = "tmp/gmake-android-arm"
+
+		elseif "android-mips" == _OPTIONS["gcc"] then
+
+			if not os.getenv("ANDROID_NDK_MIPS") or not os.getenv("ANDROID_NDK_ROOT") then
+				print("Set ANDROID_NDK_MIPS and ANDROID_NDK_ROOT envrionment variables.")
+			end
+
+			premake.gcc.cc  = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-gcc\""
+			premake.gcc.cxx = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-g++\""
+			premake.gcc.ar  = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-ar\""
+			LOCATION = "tmp/gmake-android-mips"
+
+		elseif "android-x86" == _OPTIONS["gcc"] then
+
+			if not os.getenv("ANDROID_NDK_X86") or not os.getenv("ANDROID_NDK_ROOT") then
+				print("Set ANDROID_NDK_X86 and ANDROID_NDK_ROOT envrionment variables.")
+			end
+
+			premake.gcc.cc  = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-gcc\""
+			premake.gcc.cxx = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-g++\""
+			premake.gcc.ar  = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-ar\""
+			LOCATION = "tmp/gmake-android-x86"
+
 		end
+		BINARY_DIR = LOCATION .. "/bin/"
 	end
 
-	
+	configurations { "Debug", "Release", "RelWithDebInfo" }
+	platforms { "x32", "x64" }
+	flags { "NoPCH" }
+	location(LOCATION) 
+	language "C++"
+
 project "lua"
 	kind "StaticLib"
 
@@ -262,21 +364,22 @@ project ("bgfx" )
 
 	defaultConfigurations()
 
-	configuration {}
-	BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
-	local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 
-	flags {
-		"NativeWChar",
-		"NoRTTI",
-		"NoExceptions",
-		"NoEditAndContinue",
-		"Symbols"
-	}
+	configuration { "window", "not gmake" }
+		BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
+		local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 
 		buildoptions {
 			"/Oy-",
 			"/Ob2"
+		}
+		
+		flags {
+			"NativeWChar",
+			"NoRTTI",
+			"NoExceptions",
+			"NoEditAndContinue",
+			"Symbols"
 		}
 
 		defines {
