@@ -75,45 +75,57 @@ newaction {
 	end
 }
 
+
+function install(ide, platform)
+	function copyLibrary(lib)
+		function copyConf(lib, configuration)
+			local PLATFORM_DIR = platform .. "/"
+			local CONFIGURATION_DIR = configuration .. "/"
+			local DEST_DIR = "../../LumixEngine/external"
+			--os.execute("mkdir \"".. path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR) .. "\"")
+			
+			local from = path.join("tmp/" .. platform .. "_" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. "lib" .. lib .. ".a")
+			local to = path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. "lib" .. lib .. ".a")
+			os.copyfile(from, to)
+		end
+		
+		copyConf(lib, "release")
+		copyConf(lib, "debug")
+	end
+	
+	copyLibrary("lua")
+	copyLibrary("recast")
+	copyLibrary("bgfx")
+	
+	os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
+
+	os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
+	os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
+	os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
+	os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
+	os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
+
+	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+end
+
+
+
 newaction {
 	trigger = "install-emscripten",
 	description = "Install in ../../LumixEngine/external",
 	execute = function()
-		function copyLibrary(lib)
-			function copyConf(lib, configuration)
-				function copyPlatform(lib, configuration, platform, ide)
-					local PLATFORM_DIR = platform .. "/"
-					local CONFIGURATION_DIR = configuration .. "/"
-					local DEST_DIR = "../../LumixEngine/external"
-					--os.execute("mkdir \"".. path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib) .. "\"")
-					
-					print("from" .. path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
-					print("to" .. path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
-					os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"),
-						path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. "lib" .. lib .. ".a"))
-				end
-				copyPlatform(lib, configuration, "win32", "gmake");
-			end
-			
-			copyConf(lib, "release")
-			copyConf(lib, "debug")
-		end
-		
-		copyLibrary("lua")
-		copyLibrary("recast")
-		copyLibrary("bgfx")
-		
-		os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
+		install("gmake", "emscripten")
+	end
+}
 
-		os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
-		os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
-		os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
-		os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
-		os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
 
-		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+newaction {
+	trigger = "install-android-x86",
+	description = "Install in ../../LumixEngine/external",
+	execute = function()
+		install("gmake", "android-x86")
 	end
 }
 
@@ -126,10 +138,11 @@ function defaultConfigurations()
 		flags { "Optimize", "WinMain" }
 	configuration {}
 
-	local platforms = {
-		windows = {x64 = "win64", x32 = "win32"},
-		linux = {x64 = "linux64", x32 = "linux32"},
-	}
+	local platforms = {}
+	platforms["windows"] = {x64 = "win64", x32 = "win32"}
+	platforms["linux"] = {x64 = "linux64", x32 = "linux32"}
+	platforms["android-x86"] = {x64 = "android-x86", x32 = "android-x86"}
+	
 	for _, platform_bit in ipairs({ "x64", "x32" }) do
 		for platform, platform_dirs in pairs(platforms) do
 			local platform_dir = platform_dirs[platform_bit]
@@ -224,7 +237,7 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.cxx  = "\"$(EMSCRIPTEN)/em++\""
 			premake.gcc.ar   = "\"$(EMSCRIPTEN)/emar\""
 			premake.gcc.llvm = true
-			LOCATION = "tmp/gmake"
+			LOCATION = "tmp/emscripten_gmake"
 		elseif "android-arm" == _OPTIONS["gcc"] then
 
 			if not os.getenv("ANDROID_NDK_ARM") or not os.getenv("ANDROID_NDK_ROOT") then
@@ -234,7 +247,7 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.cc  = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-gcc\""
 			premake.gcc.cxx = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-g++\""
 			premake.gcc.ar  = "\"$(ANDROID_NDK_ARM)/bin/arm-linux-androideabi-ar\""
-			LOCATION = "tmp/gmake-android-arm"
+			LOCATION = "tmp/android-arm_gmake"
 
 		elseif "android-mips" == _OPTIONS["gcc"] then
 
@@ -245,7 +258,7 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.cc  = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-gcc\""
 			premake.gcc.cxx = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-g++\""
 			premake.gcc.ar  = "\"$(ANDROID_NDK_MIPS)/bin/mipsel-linux-android-ar\""
-			LOCATION = "tmp/gmake-android-mips"
+			LOCATION = "tmp/android-mips_gmake"
 
 		elseif "android-x86" == _OPTIONS["gcc"] then
 
@@ -256,7 +269,7 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.cc  = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-gcc\""
 			premake.gcc.cxx = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-g++\""
 			premake.gcc.ar  = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-ar\""
-			LOCATION = "tmp/gmake-android-x86"
+			LOCATION = "tmp/android-x86_gmake"
 
 		end
 		BINARY_DIR = LOCATION .. "/bin/"
