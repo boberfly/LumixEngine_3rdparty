@@ -15,69 +15,75 @@ newoption {
 		}
 	}
 
+function installEx(platforms, ide, lib_prefix, lib_ext, dll_prefix, dll_ext)
+	function copyLibrary(lib)
+		function copyConf(lib, configuration)
+			function copyPlatform(lib, configuration, platform)
+				local PLATFORM_DIR = platform .. "/"
+				local CONFIGURATION_DIR = configuration .. "/"
+				local DEST_DIR = "../../LumixEngine/external"
+				function copyToLibDir(ext)
+					os.mkdir(path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR))
+					os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib_prefix .. lib .. ext),
+						path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib_prefix .. lib .. ext))
+				end
+				copyToLibDir(lib_ext)
+				if lib_ext == ".lib" then
+					copyToLibDir(".pdb")
+				end
+			end
+			for _, platform in ipairs(platforms) do
+				copyPlatform(lib, configuration, platform);
+			end
+		end
+		
+		copyConf(lib, "release")
+		copyConf(lib, "debug")
+	end
+	
+	copyLibrary("lua")
+	copyLibrary("recast")
+	copyLibrary("bgfx")
+	copyLibrary("crnlib")
+	copyLibrary("assimp")
+	
+	--os.execute("mkdir \"../../LumixEngine/external/bgfx/include\"")
+	os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
+
+	--os.execute("mkdir \"../../LumixEngine/external/lua/include\"")
+	os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
+	os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
+	os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
+	os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
+	os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
+
+	--os.execute("mkdir \"../../LumixEngine/external/crnlib/include\"")
+	os.copyfile("../3rdparty/crunch/inc/crn_decomp.h", "../../LumixEngine/external/crnlib/include/crn_decomp.h");
+	os.copyfile("../3rdparty/crunch/inc/crnlib.h", "../../LumixEngine/external/crnlib/include/crnlib.h");
+	os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
+
+	os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
+
+	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+end
+
 newaction {
 	trigger = "install",
 	description = "Install in ../../LumixEngine/external",
 	execute = function()
-		function copyLibrary(lib, copy_dll)
-			function copyConf(lib, configuration, copy_dll)
-				function copyPlatform(lib, configuration, platform, ide, copy_dll)
-					local PLATFORM_DIR = platform .. "/"
-					local CONFIGURATION_DIR = configuration .. "/"
-					local DEST_DIR = "../../LumixEngine/external"
-					function copyLibPdb(ext)
-						os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
-							path.join(DEST_DIR, lib .. "/lib/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib .. ext))
-					end
-					function copyDll()
-						local ext = ".dll"
-						os.copyfile(path.join("tmp/" .. ide .. "/bin", PLATFORM_DIR .. CONFIGURATION_DIR .. lib .. ext),
-							path.join(DEST_DIR, lib .. "/dll/" .. platform .. "_" .. ide .. "/" .. CONFIGURATION_DIR .. lib .. ext))
-					end
-					copyLibPdb(".pdb")
-					copyLibPdb(".lib")
-					if copy_dll then	
-						copyDll()
-					end
-				end
-				copyPlatform(lib, configuration, "win32", "vs2015", copy_dll);
-				copyPlatform(lib, configuration, "win64", "vs2015", copy_dll);
-			end
-			
-			copyConf(lib, "release", copy_dll)
-			copyConf(lib, "debug", copy_dll)
-		end
-		
-		copyLibrary("lua", false)
-		copyLibrary("recast", false)
-		copyLibrary("bgfx", false)
-		copyLibrary("crnlib", false)
-		copyLibrary("assimp", true)
-		
-		--os.execute("mkdir \"../../LumixEngine/external/bgfx/include\"")
-		os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
-
-		--os.execute("mkdir \"../../LumixEngine/external/lua/include\"")
-		os.copyfile("../3rdparty/lua/src/lauxlib.h", "../../LumixEngine/external/lua/include/lauxlib.h");
-		os.copyfile("../3rdparty/lua/src/lua.h", "../../LumixEngine/external/lua/include/lua.h");
-		os.copyfile("../3rdparty/lua/src/lua.hpp", "../../LumixEngine/external/lua/include/lua.hpp");
-		os.copyfile("../3rdparty/lua/src/luaconf.h", "../../LumixEngine/external/lua/include/luaconf.h");
-		os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
-
-		--os.execute("mkdir \"../../LumixEngine/external/crnlib/include\"")
-		os.copyfile("../3rdparty/crunch/inc/crn_decomp.h", "../../LumixEngine/external/crnlib/include/crn_decomp.h");
-		os.copyfile("../3rdparty/crunch/inc/crnlib.h", "../../LumixEngine/external/crnlib/include/crnlib.h");
-		os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
-
-		os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
-
-		os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-		os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
-
+		installEx({"win32", "win64"}, "vs2015", "", ".lib", "", ".dll")
 	end
 }
 
+newaction {
+	trigger = "install-linux-gcc",
+	description = "Install in ../../LumixEngine/external",
+	execute = function()
+		installEx({"linux64"}, "gcc", "lib", ".a", "lib", ".so")
+	end
+}
 
 function install(ide, platform)
 	function copyLibrary(lib)
@@ -112,8 +118,6 @@ function install(ide, platform)
 	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 end
-
-
 
 newaction {
 	trigger = "install-emscripten",
@@ -275,19 +279,19 @@ solution "LumixEngine_3rdparty"
 			LOCATION = "tmp/android-x86_gmake"
 
 		elseif "linux-gcc" == _OPTIONS["gcc"] then
-			LOCATION = "tmp/linux_gcc"
+			LOCATION = "tmp/gcc"
 
 		elseif "linux-gcc-5" == _OPTIONS["gcc"] then
 			premake.gcc.cc  = "gcc-5"
 			premake.gcc.cxx = "g++-5"
 			premake.gcc.ar  = "ar"
-			LOCATION = "tmp/linux_gcc5"
+			LOCATION = "tmp/gcc5"
 			
 		elseif "linux-clang" == _OPTIONS["gcc"] then
 			premake.gcc.cc  = "clang"
 			premake.gcc.cxx = "clang++"
 			premake.gcc.ar  = "ar"
-			LOCATION = "tmp/linux_clang"
+			LOCATION = "tmp/clang"
 
 		end
 		BINARY_DIR = LOCATION .. "/bin/"
@@ -357,7 +361,7 @@ configuration "windows"
 	defaultConfigurations()
 
 project "assimp"
-	kind "SharedLib"
+	kind "StaticLib"
 	files { "../3rdparty/assimp/code/**.h"
 		, "../3rdparty/assimp/code/**.cpp"
 		, "../3rdparty/assimp/include/**.h"
