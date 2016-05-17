@@ -7,8 +7,11 @@ newoption {
 		value = "GCC",
 		description = "Choose GCC flavor",
 		allowed = {
-			{ "asmjs",           "Emscripten/asm.js"          },
-			{ "android-x86",     "Android - x86"              }
+			{ "asmjs",           	"Emscripten/asm.js"					},
+			{ "android-x86",     	"Android - x86" 					},
+			{ "linux-gcc", 			"Linux (GCC compiler)" 				},
+			{ "linux-gcc-5", 		"Linux (GCC-5 compiler)"			},
+			{ "linux-clang", 		"Linux (Clang compiler)"			}
 		}
 	}
 
@@ -271,6 +274,21 @@ solution "LumixEngine_3rdparty"
 			premake.gcc.ar  = "\"$(ANDROID_NDK_X86)/bin/i686-linux-android-ar\""
 			LOCATION = "tmp/android-x86_gmake"
 
+		elseif "linux-gcc" == _OPTIONS["gcc"] then
+			LOCATION = "tmp/linux_gcc"
+
+		elseif "linux-gcc-5" == _OPTIONS["gcc"] then
+			premake.gcc.cc  = "gcc-5"
+			premake.gcc.cxx = "g++-5"
+			premake.gcc.ar  = "ar"
+			LOCATION = "tmp/linux_gcc5"
+			
+		elseif "linux-clang" == _OPTIONS["gcc"] then
+			premake.gcc.cc  = "clang"
+			premake.gcc.cxx = "clang++"
+			premake.gcc.ar  = "ar"
+			LOCATION = "tmp/linux_clang"
+
 		end
 		BINARY_DIR = LOCATION .. "/bin/"
 	end
@@ -293,12 +311,15 @@ project "lua"
 project "recast"
 	kind "StaticLib"
 
-	defines { "_CRT_SECURE_NO_WARNINGS" }
+	configuration { "vs*" }
+		defines { "_CRT_SECURE_NO_WARNINGS" }
+
+	configuration {}
 	
-	includedirs { "../3rdparty/recastnavigation/Recast/include"
-		, "../3rdparty/recastnavigation/Detour/include"
-		, "../3rdparty/recastnavigation/DebugUtils/include"
-		, "../3rdparty/recastnavigation/DetourTileCache/include"
+	includedirs { "../3rdparty/recastnavigation/Recast/Include"
+		, "../3rdparty/recastnavigation/Detour/Include"
+		, "../3rdparty/recastnavigation/DebugUtils/Include"
+		, "../3rdparty/recastnavigation/DetourTileCache/Include"
 	}
 
 	files { "../3rdparty/recastnavigation/Recast/**.h"
@@ -313,63 +334,59 @@ project "recast"
 
 	defaultConfigurations()
 
-if _ACTION ~= "gmake" then
+project "crnlib"
+	kind "StaticLib"
+
+	files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
+	excludes { "../3rdparty/crunch/crnlib/lzham*" }
+
+configuration "windows"
+		defines { "WIN32", "_LIB" }
+		excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
+	configuration "not windows"
+		excludes {
+			"../3rdparty/crunch/crnlib/crn_threading_win32.*",
+			"../3rdparty/crunch/crnlib/lzma_Threads.cpp",
+			"../3rdparty/crunch/crnlib/lzma_LzFindMt.cpp",
+		}
+		buildoptions { "-fomit-frame-pointer", "-ffast-math", "-fno-math-errno", "-fno-strict-aliasing" }
+	configuration {"not windows", "Debug"}
+		defines { "_DEBUG" }
+	configuration {}
 	
-	project "crnlib"
-		kind "StaticLib"
+	defaultConfigurations()
 
-		files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
-		excludes { "../3rdparty/crunch/crnlib/lzham*" }
-
-	configuration "windows"
-			defines { "WIN32", "_LIB" }
-			excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
-		configuration "not windows"
-			excludes {
-				"../3rdparty/crunch/crnlib/crn_threading_win32.*",
-				"../3rdparty/crunch/crnlib/lzma_Threads.cpp",
-				"../3rdparty/crunch/crnlib/lzma_LzFindMt.cpp",
-			}
-			buildoptions { "-fomit-frame-pointer", "-ffast-math", "-fno-math-errno", "-fno-strict-aliasing" }
-		configuration {"not windows", "Debug"}
-			defines { "_DEBUG" }
-		configuration {}
+project "assimp"
+	kind "SharedLib"
+	files { "../3rdparty/assimp/code/**.h"
+		, "../3rdparty/assimp/code/**.cpp"
+		, "../3rdparty/assimp/include/**.h"
+		, "../3rdparty/assimp/contrib/**.c"
+		, "../3rdparty/assimp/contrib/**.cpp"
+		, "../3rdparty/assimp/contrib/**.cc"
+		, "../3rdparty/assimp/contrib/**.h"
+		, "genie.lua" 
+	}
+	includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
+		, "../3rdparty/assimp/include"
+		, "../misc/assimp"
+		, "../3rdparty/assimp/contrib/rapidjson/include"
+		, "../3rdparty/assimp/contrib/openddlparser/include"
+		, "../3rdparty/assimp/contrib/unzip"
+		, "../3rdparty/assimp/contrib/zlib"
+	}
+	defines {
+		"OPENDDL_NO_USE_CPP11",
+		"ASSIMP_BUILD_BOOST_WORKAROUND",
+		"ASSIMP_BUILD_NO_C4D_IMPORTER",
+		"ASSIMP_BUILD_DLL_EXPORT",
+		"OPENDDLPARSER_BUILD",
+		"assimp_EXPORTS",
+		"_SCL_SECURE_NO_WARNINGS",
+		"_CRT_SECURE_NO_WARNINGS"
+	}	
 		
-		defaultConfigurations()
-
-	project "assimp"
-		kind "SharedLib"
-		files { "../3rdparty/assimp/code/**.h"
-			, "../3rdparty/assimp/code/**.cpp"
-			, "../3rdparty/assimp/include/**.h"
-			, "../3rdparty/assimp/contrib/**.c"
-			, "../3rdparty/assimp/contrib/**.cpp"
-			, "../3rdparty/assimp/contrib/**.cc"
-			, "../3rdparty/assimp/contrib/**.h"
-			, "genie.lua" 
-		}
-		includedirs { "../3rdparty/assimp/code/BoostWorkaround/"
-			, "../3rdparty/assimp/include"
-			, "../misc/assimp"
-			, "../3rdparty/assimp/contrib/rapidjson/include"
-			, "../3rdparty/assimp/contrib/openddlparser/include"
-			, "../3rdparty/assimp/contrib/unzip"
-			, "../3rdparty/assimp/contrib/zlib"
-		}
-		defines {
-			"OPENDDL_NO_USE_CPP11",
-			"ASSIMP_BUILD_BOOST_WORKAROUND",
-			"ASSIMP_BUILD_NO_C4D_IMPORTER",
-			"ASSIMP_BUILD_DLL_EXPORT",
-			"OPENDDLPARSER_BUILD",
-			"assimp_EXPORTS",
-			"_SCL_SECURE_NO_WARNINGS",
-			"_CRT_SECURE_NO_WARNINGS"
-		}	
-			
-		defaultConfigurations()
-
-end
+	defaultConfigurations()
 
 project ("bgfx" )
 	uuid (os.uuid("bgfx"))
@@ -378,7 +395,7 @@ project ("bgfx" )
 	defaultConfigurations()
 
 
-	configuration { "window", "not gmake" }
+	configuration { "vs*" }
 		BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
 		local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 
