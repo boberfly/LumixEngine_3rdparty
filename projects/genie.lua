@@ -479,10 +479,13 @@ project "SDL"
 
 	configuration { "linux-*" }
 		files { "../3rdparty/SDL/src/video/x11/*"
+			, "../3rdparty/SDL/src/audio/dsp/*"
 			, "../3rdparty/SDL/src/**/linux/*"
+			, "../3rdparty/SDL/src/**/dlopen/*"
 			, "../3rdparty/SDL/src/**/pthread/*" 
 			, "../3rdparty/SDL/src/**/unix/*" 
 		}
+	configuration { }
 		
 	defines { "_CRT_SECURE_NO_WARNINGS", "HAVE_LIBC" }
 	excludes { "../3rdparty/SDL/src/main/**" }
