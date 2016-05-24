@@ -42,6 +42,9 @@ function copyHeaders()
 	os.copyfile("../3rdparty/crunch/inc/dds_defs.h", "../../LumixEngine/external/crnlib/include/dds_defs.h");
 
 	os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
+	
+	os.mkdir("../../LumixEngine/external/sdl/include")
+	os.execute("xcopy \"../3rdparty/sdl/include\" \"../../LumixEngine/external/sdl/include\"  /S /Y");
 
 	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
@@ -102,6 +105,7 @@ function installEx(platform)
 	copyLibrary("recast", false)
 	copyLibrary("bgfx", false)
 	copyLibrary("crnlib", false)
+	copyLibrary("sdl", false)
 	copyLibrary("assimp", true)
 	
 	if platform == "windows" then
@@ -435,7 +439,44 @@ project "assimp"
 		
 	defaultConfigurations()
 
-project ("bgfx" )
+project "sdl"
+	kind "StaticLib"
+	
+	defaultConfigurations()
+	files { "../3rdparty/sdl/src/*.*"
+		, "../3rdparty/sdl/src/**/windows/*"
+		, "../3rdparty/sdl/src/atomic/*" 
+		, "../3rdparty/sdl/src/audio/*" 
+		, "../3rdparty/sdl/src/audio/directsound/*" 
+		, "../3rdparty/sdl/src/audio/disk/*" 
+		, "../3rdparty/sdl/src/audio/dummy/*" 
+		, "../3rdparty/sdl/src/audio/xaudio2/SDL_xaudio2.*" 
+		, "../3rdparty/sdl/src/audio/winmm/*" 
+		, "../3rdparty/sdl/src/cpuinfo/*" 
+		, "../3rdparty/sdl/src/dynapi/*" 
+		, "../3rdparty/sdl/src/events/*" 
+		, "../3rdparty/sdl/src/file/*" 
+		, "../3rdparty/sdl/src/haptic/*" 
+		, "../3rdparty/sdl/src/joystick/*" 
+		, "../3rdparty/sdl/src/libm/*" 
+		, "../3rdparty/sdl/src/power/*" 
+		, "../3rdparty/sdl/src/render/*" 
+		, "../3rdparty/sdl/src/render/direct3d/*" 
+		, "../3rdparty/sdl/src/render/direct3d11/SDL_render_d3d11.c" 
+		, "../3rdparty/sdl/src/render/opengl/*" 
+		, "../3rdparty/sdl/src/render/opengles2/*" 
+		, "../3rdparty/sdl/src/render/software/*" 
+		, "../3rdparty/sdl/src/stdlib/*" 
+		, "../3rdparty/sdl/src/thread/*" 
+		, "../3rdparty/sdl/src/thread/generic/SDL_syscond.c" 
+		, "../3rdparty/sdl/src/timer/*" 
+		, "../3rdparty/sdl/src/video/*" 
+		, "../3rdparty/sdl/src/video/dummy/*" 
+		}
+	excludes { "../3rdparty/sdl/src/main/**" }
+	includedirs { "../3rdparty/sdl/include" }
+	
+project "bgfx"
 	uuid (os.uuid("bgfx"))
 	kind "StaticLib"
 
