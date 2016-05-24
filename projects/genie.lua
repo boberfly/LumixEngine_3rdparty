@@ -43,8 +43,8 @@ function copyHeaders()
 
 	os.execute("xcopy \"../3rdparty/assimp/include\" \"../../LumixEngine/external/assimp/include\"  /S /Y");
 	
-	os.mkdir("../../LumixEngine/external/sdl/include")
-	os.execute("xcopy \"../3rdparty/sdl/include\" \"../../LumixEngine/external/sdl/include\"  /S /Y");
+	os.mkdir("../../LumixEngine/external/SDL/include")
+	os.execute("xcopy \"../3rdparty/SDL/include\" \"../../LumixEngine/external/SDL/include\"  /S /Y");
 
 	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
@@ -105,7 +105,7 @@ function installEx(platform)
 	copyLibrary("recast", false)
 	copyLibrary("bgfx", false)
 	copyLibrary("crnlib", false)
-	copyLibrary("sdl", false)
+	copyLibrary("SDL", false)
 	copyLibrary("assimp", true)
 	
 	if platform == "windows" then
@@ -211,7 +211,9 @@ function defaultConfigurations()
 end
 
 solution "LumixEngine_3rdparty"
-	if _ACTION == "gmake" then
+	
+		configuration { "linux-*" }
+			linkoptions { "-fPIC" }
 	
 		configuration { "android-*" }
 			flags {
@@ -281,7 +283,7 @@ solution "LumixEngine_3rdparty"
 			}
 		configuration {}			
 			
-	
+	if _ACTION == "gmake" then
 		if "asmjs" == _OPTIONS["gcc"] then
 
 			if not os.getenv("EMSCRIPTEN") then
@@ -439,43 +441,52 @@ project "assimp"
 		
 	defaultConfigurations()
 
-project "sdl"
+project "SDL"
 	kind "StaticLib"
 	
 	defaultConfigurations()
-	files { "../3rdparty/sdl/src/*.*"
-		, "../3rdparty/sdl/src/**/windows/*"
-		, "../3rdparty/sdl/src/atomic/*" 
-		, "../3rdparty/sdl/src/audio/*" 
-		, "../3rdparty/sdl/src/audio/directsound/*" 
-		, "../3rdparty/sdl/src/audio/disk/*" 
-		, "../3rdparty/sdl/src/audio/dummy/*" 
-		, "../3rdparty/sdl/src/audio/xaudio2/SDL_xaudio2.*" 
-		, "../3rdparty/sdl/src/audio/winmm/*" 
-		, "../3rdparty/sdl/src/cpuinfo/*" 
-		, "../3rdparty/sdl/src/dynapi/*" 
-		, "../3rdparty/sdl/src/events/*" 
-		, "../3rdparty/sdl/src/file/*" 
-		, "../3rdparty/sdl/src/haptic/*" 
-		, "../3rdparty/sdl/src/joystick/*" 
-		, "../3rdparty/sdl/src/libm/*" 
-		, "../3rdparty/sdl/src/power/*" 
-		, "../3rdparty/sdl/src/render/*" 
-		, "../3rdparty/sdl/src/render/direct3d/*" 
-		, "../3rdparty/sdl/src/render/direct3d11/SDL_render_d3d11.c" 
-		, "../3rdparty/sdl/src/render/opengl/*" 
-		, "../3rdparty/sdl/src/render/opengles2/*" 
-		, "../3rdparty/sdl/src/render/software/*" 
-		, "../3rdparty/sdl/src/stdlib/*" 
-		, "../3rdparty/sdl/src/thread/*" 
-		, "../3rdparty/sdl/src/thread/generic/SDL_syscond.c" 
-		, "../3rdparty/sdl/src/timer/*" 
-		, "../3rdparty/sdl/src/video/*" 
-		, "../3rdparty/sdl/src/video/dummy/*" 
+	files { "../3rdparty/SDL/src/*.*"
+		, "../3rdparty/SDL/src/atomic/*" 
+		, "../3rdparty/SDL/src/audio/*" 
+		, "../3rdparty/SDL/src/audio/directsound/*" 
+		, "../3rdparty/SDL/src/audio/disk/*" 
+		, "../3rdparty/SDL/src/audio/dummy/*" 
+		, "../3rdparty/SDL/src/audio/xaudio2/SDL_xaudio2.*" 
+		, "../3rdparty/SDL/src/audio/winmm/*" 
+		, "../3rdparty/SDL/src/cpuinfo/*" 
+		, "../3rdparty/SDL/src/dynapi/*" 
+		, "../3rdparty/SDL/src/events/*" 
+		, "../3rdparty/SDL/src/file/*" 
+		, "../3rdparty/SDL/src/haptic/*" 
+		, "../3rdparty/SDL/src/joystick/*" 
+		, "../3rdparty/SDL/src/libm/*" 
+		, "../3rdparty/SDL/src/power/*" 
+		, "../3rdparty/SDL/src/render/*" 
+		, "../3rdparty/SDL/src/render/direct3d/*" 
+		, "../3rdparty/SDL/src/render/direct3d11/SDL_render_d3d11.c" 
+		, "../3rdparty/SDL/src/render/opengl/*" 
+		, "../3rdparty/SDL/src/render/opengles2/*" 
+		, "../3rdparty/SDL/src/render/software/*" 
+		, "../3rdparty/SDL/src/stdlib/*" 
+		, "../3rdparty/SDL/src/thread/*" 
+		, "../3rdparty/SDL/src/thread/generic/SDL_syscond.c" 
+		, "../3rdparty/SDL/src/timer/*" 
+		, "../3rdparty/SDL/src/video/*" 
+		, "../3rdparty/SDL/src/video/dummy/*" 
 		}
+	configuration { "vs*" }
+		files { "../3rdparty/SDL/src/**/windows/*" }
+
+	configuration { "linux-*" }
+		files { "../3rdparty/SDL/src/video/x11/*"
+			, "../3rdparty/SDL/src/**/linux/*"
+			, "../3rdparty/SDL/src/**/pthread/*" 
+			, "../3rdparty/SDL/src/**/unix/*" 
+		}
+		
 	defines { "_CRT_SECURE_NO_WARNINGS", "HAVE_LIBC" }
-	excludes { "../3rdparty/sdl/src/main/**" }
-	includedirs { "../3rdparty/sdl/include" }
+	excludes { "../3rdparty/SDL/src/main/**" }
+	includedirs { "../3rdparty/SDL/include" }
 	
 project "bgfx"
 	uuid (os.uuid("bgfx"))
