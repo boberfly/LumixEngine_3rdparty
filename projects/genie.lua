@@ -473,6 +473,7 @@ project "sdl"
 		, "../3rdparty/sdl/src/video/*" 
 		, "../3rdparty/sdl/src/video/dummy/*" 
 		}
+	defines { "_CRT_SECURE_NO_WARNINGS", "HAVE_LIBC" }
 	excludes { "../3rdparty/sdl/src/main/**" }
 	includedirs { "../3rdparty/sdl/include" }
 	
