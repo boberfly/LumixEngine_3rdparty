@@ -498,6 +498,9 @@ project "bgfx"
 	defaultConfigurations()
 
 
+	configuration {"linux-*"}
+		defines { "BGFX_CONFIG_RENDERER_OPENGL=31" }
+	
 	configuration { "vs*" }
 		BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
 		local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
