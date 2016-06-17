@@ -47,6 +47,7 @@ function copyHeaders()
 	os.execute("xcopy \"../3rdparty/SDL/include\" \"../../LumixEngine/external/SDL/include\"  /S /Y");
 
 	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/DetourCrowd/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 end
@@ -160,6 +161,7 @@ function install(ide, platform)
 	os.copyfile("../3rdparty/lua/src/lualib.h", "../../LumixEngine/external/lua/include/lualib.h");
 
 	os.execute("xcopy \"../3rdparty/recastnavigation/Detour/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
+	os.execute("xcopy \"../3rdparty/recastnavigation/DetourCrowd/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/Debug/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 	os.execute("xcopy \"../3rdparty/recastnavigation/DebugUtils/include\" \"../../LumixEngine/external/recast/include\"  /S /Y");
 end
@@ -371,6 +373,7 @@ project "recast"
 	
 	includedirs { "../3rdparty/recastnavigation/Recast/Include"
 		, "../3rdparty/recastnavigation/Detour/Include"
+		, "../3rdparty/recastnavigation/DetourCrowd/Include"
 		, "../3rdparty/recastnavigation/DebugUtils/Include"
 		, "../3rdparty/recastnavigation/DetourTileCache/Include"
 	}
@@ -379,6 +382,8 @@ project "recast"
 		, "../3rdparty/recastnavigation/Recast/**.cpp"
 		, "../3rdparty/recastnavigation/Detour/**.h"
 		, "../3rdparty/recastnavigation/Detour/**.cpp"
+		, "../3rdparty/recastnavigation/DetourCrowd/**.h"
+		, "../3rdparty/recastnavigation/DetourCrowd/**.cpp"
 		, "../3rdparty/recastnavigation/DebugUtils/**.h"
 		, "../3rdparty/recastnavigation/DebugUtils/**.cpp"
 		, "../3rdparty/recastnavigation/DetourTileCache/**.h"
