@@ -104,6 +104,7 @@ function installEx(platform)
 	copyLibrary("lua", false)
 	copyLibrary("recast", false)
 	copyLibrary("bgfx", false)
+	copyLibrary("turbobadger", false)
 	copyLibrary("crnlib", false)
 	copyLibrary("SDL", false)
 	copyLibrary("assimp", true)
@@ -150,6 +151,7 @@ function install(ide, platform)
 	copyLibrary("lua")
 	copyLibrary("recast")
 	copyLibrary("bgfx")
+	copyLibrary("turbobadger")
 	
 	os.execute("xcopy \"../3rdparty/bgfx/include\" \"../../LumixEngine/external/bgfx/include\"  /S /Y");
 
@@ -393,7 +395,7 @@ project "crnlib"
 	files { "../3rdparty/crunch/crnlib/**.h", "../3rdparty/crunch/crnlib/**.cpp", "genie.lua" }
 	excludes { "../3rdparty/crunch/crnlib/lzham*" }
 
-configuration "windows"
+	configuration "windows"
 		defines { "WIN32", "_LIB" }
 		excludes { "../3rdparty/crunch/crnlib/crn_threading_pthreads.*" }
 	configuration "not windows"
@@ -409,6 +411,33 @@ configuration "windows"
 	
 	defaultConfigurations()
 
+project "turbobadger"
+	kind "StaticLib"
+
+	files { "../3rdparty/turbobadger/src/**.h", "../3rdparty/turbobadger/src/**.cpp", "genie.lua" }
+	includedirs { "../3rdparty/turbobadger/src/tb/" }
+	
+	configuration "windows"
+		defines { "WIN32", "_LIB" }
+
+	configuration { "vs20*" }
+		defines {
+			"WIN32",
+			"_WIN32",
+			"_HAS_EXCEPTIONS=0",
+			"_SCL_SECURE=0",
+			"_SECURE_SCL=0",
+			"_SCL_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_CRT_NONSTDC_NO_DEPRECATE",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"__STDC_LIMIT_MACROS",
+			"__STDC_FORMAT_MACROS",
+			"__STDC_CONSTANT_MACROS"
+		}	
+	
+	defaultConfigurations()
+	
 project "assimp"
 	kind "SharedLib"
 	files { "../3rdparty/assimp/code/**.h"
@@ -501,7 +530,7 @@ project "bgfx"
 	configuration {"linux-*"}
 		defines { "BGFX_CONFIG_RENDERER_OPENGL=31" }
 	
-	configuration { "vs*" }
+	configuration { "vs20*" }
 		BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
 		local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 
