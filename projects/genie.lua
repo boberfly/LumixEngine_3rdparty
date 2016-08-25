@@ -192,6 +192,9 @@ function defaultConfigurations()
 	configuration "Release"
 		defines { "NDEBUG" }
 		flags { "Optimize", "WinMain" }
+	configuration "RelWithDebInfo"
+		defines { "NDEBUG" }
+		flags { "Symbols", "Optimize", "WinMain" }
 	configuration {}
 
 	local platforms = {}
@@ -206,6 +209,8 @@ function defaultConfigurations()
 				targetdir(BINARY_DIR .. platform_dir .. "/debug")
 			configuration {platform_bit, platform, "Release"}
 				targetdir(BINARY_DIR .. platform_dir .. "/release")
+			configuration {platform_bit, platform, "RelWithDebInfo"}
+				targetdir(BINARY_DIR .. platform_dir .. "/relwithdebinfo")
 		end
 	end
 
