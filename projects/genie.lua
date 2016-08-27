@@ -616,9 +616,12 @@ project "shaderc"
 		path.join(GLSL_OPTIMIZER, "src/mesa"),
 		path.join(GLSL_OPTIMIZER, "src/mapi"),
 		path.join(GLSL_OPTIMIZER, "src/glsl"),
+		
+		path.join(BGFX_DIR, "tools/shaderc"),
 	}
 
 	files {
+		"../misc/shaderc/error.cpp",
 		path.join(BGFX_DIR, "tools/shaderc/**.cpp"),
 		path.join(BGFX_DIR, "tools/shaderc/**.h"),
 		path.join(BGFX_DIR, "src/vertexdecl.**"),
@@ -641,6 +644,13 @@ project "shaderc"
 		path.join(GLSL_OPTIMIZER, "src/util/**.c"),
 		path.join(GLSL_OPTIMIZER, "src/util/**.h"),
 	}
+
+	excludes {
+		path.join(BGFX_DIR, "tools/shaderc/shaderc.cpp"),
+		path.join(BGFX_DIR, "tools/shaderc/shaderc_hlsl.cpp"),
+		path.join(BGFX_DIR, "tools/shaderc/shaderc_glsl.cpp"),
+	}
+
 
 	removefiles {
 		path.join(GLSL_OPTIMIZER, "src/glsl/glcpp/glcpp.c"),
