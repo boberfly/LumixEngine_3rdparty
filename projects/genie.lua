@@ -538,7 +538,6 @@ project "shaderc"
 
 	includedirs {
 		path.join(GLSL_OPTIMIZER, "src"),
-		path.join(BX_DIR, "include/compat/msvc"),
 		BGFX_DIR,
 		BX_DIR
 	}
@@ -557,6 +556,7 @@ project "shaderc"
 	configuration { "vs*" }
 		includedirs {
 			path.join(GLSL_OPTIMIZER, "src/glsl/msvc"),
+			path.join(BX_DIR, "include/compat/msvc"),
 		}
 
 		defines { -- glsl-optimizer
@@ -581,6 +581,7 @@ project "shaderc"
 		buildoptions {
 			"-fno-strict-aliasing", -- glsl-optimizer has bugs if strict aliasing is used.
 			"-Wno-unused-parameter",
+			"-std=c++11"
 		}
 		removebuildoptions {
 			"-Wshadow", -- glsl-optimizer is full of -Wshadow warnings ignore it.
