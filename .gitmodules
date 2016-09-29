@@ -16,6 +16,3 @@
 [submodule "3rdparty/recastnavigation"]
 	path = 3rdparty/recastnavigation
 	url = https://github.com/recastnavigation/recastnavigation.git
-[submodule "3rdparty/turbobadger"]
-	path = 3rdparty/turbobadger
-	url = https://github.com/fruxo/turbobadger
