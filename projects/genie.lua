@@ -9,6 +9,8 @@ if _ACTION == "gmake" then
 	end
 end
 
+local BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
+local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 local LOCATION = "tmp/" .. IDE
 local BINARY_DIR = path.join(LOCATION, "bin") .. "/"
 
@@ -414,6 +416,41 @@ project "crnlib"
 	
 	defaultConfigurations()
 	
+project "cmft"
+	kind "StaticLib"
+
+	files { "../3rdparty/cmft/src/**.h", "../3rdparty/cmft/src/**.cpp", "../3rdparty/cmft/include/**.h", "genie.lua" }
+	excludes { "../3rdparty/cmft/src/main.cpp" }
+	includedirs { "../3rdparty/cmft/include/", "../3rdparty/cmft/dependency/" }
+
+	configuration { "vs*" }
+        includedirs { path.join(BX_DIR, "include/compat/msvc") }
+        defines
+        {
+			"NOMINMAX",
+            "WIN32",
+            "_WIN32",
+            "_HAS_EXCEPTIONS=0",
+            "_HAS_ITERATOR_DEBUGGING=0",
+            "_SCL_SECURE=0",
+            "_SECURE_SCL=0",
+            "_SCL_SECURE_NO_WARNINGS",
+            "_CRT_SECURE_NO_WARNINGS",
+            "_CRT_SECURE_NO_DEPRECATE",
+        }
+        buildoptions
+        {
+            "/Ob2",    -- The Inline Function Expansion
+        }
+        linkoptions
+        {
+            "/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
+        }
+	
+	configuration {}
+	
+	defaultConfigurations()
+	
 project "assimp"
 	kind "SharedLib"
 	files { "../3rdparty/assimp/code/**.h"
@@ -502,8 +539,6 @@ project "shaderc"
 
 	defaultConfigurations()
 
-	BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
-	local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
 	local GLSL_OPTIMIZER = path.join(BGFX_DIR, "3rdparty/glsl-optimizer")
 	local FCPP_DIR = path.join(BGFX_DIR, "3rdparty/fcpp")
 
