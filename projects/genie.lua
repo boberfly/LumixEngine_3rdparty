@@ -428,15 +428,18 @@ project "cmft"
         defines
         {
 			"NOMINMAX",
-            "WIN32",
-            "_WIN32",
-            "_HAS_EXCEPTIONS=0",
-            "_HAS_ITERATOR_DEBUGGING=0",
-            "_SCL_SECURE=0",
-            "_SECURE_SCL=0",
-            "_SCL_SECURE_NO_WARNINGS",
-            "_CRT_SECURE_NO_WARNINGS",
-            "_CRT_SECURE_NO_DEPRECATE",
+			"WIN32",
+			"_WIN32",
+			"_HAS_EXCEPTIONS=0",
+			"_SCL_SECURE=0",
+			"_SECURE_SCL=0",
+			"_SCL_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_WARNINGS",
+			"_CRT_SECURE_NO_DEPRECATE",
+			"__STDC_LIMIT_MACROS",
+			"__STDC_FORMAT_MACROS",
+			"__STDC_CONSTANT_MACROS",
+			"BX_CONFIG_ENABLE_MSVC_LEVEL4_WARNINGS=1"
         }
         buildoptions
         {
