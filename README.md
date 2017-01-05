@@ -9,7 +9,7 @@ Source of 3rd party libraries for [Lumix Engine](https://github.com/nem0/LumixEn
 * [assimp](https://github.com/assimp/assimp)
 * [recast/detour](https://github.com/recastnavigation)
 * [SDL](https://www.libsdl.org/)
-
+* [cmft](https://github.com/dariomanesku/cmft)
 
 The 3rd party libraries are git submodules.
 
