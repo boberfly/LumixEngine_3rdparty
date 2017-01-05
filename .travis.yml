@@ -27,5 +27,4 @@ addons:
       - g++-5
       - ca-certificates
 
-      env: COMPILER=g++-5    
-
+env: COMPILER=g++-5    
