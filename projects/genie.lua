@@ -254,7 +254,7 @@ solution "LumixEngine_3rdparty"
 				"-Wundef",
 			}
 			buildoptions_cpp {
-				"-std=c++0x",
+				"-std=c++11",
 			}
 			linkoptions {
 				"-no-canonical-prefixes",
@@ -450,6 +450,11 @@ project "cmft"
             "/ignore:4221", -- LNK4221: This object file does not define any previously undefined public symbols, so it will not be used by any link operation that consumes this library
         }
 	
+	configuration { "not windows" }
+		buildoptions_cpp {
+			"-std=c++11",
+		}
+
 	configuration {}
 	
 	defaultConfigurations()
