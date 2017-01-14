@@ -683,7 +683,7 @@ project "bgfx"
 
 	defaultConfigurations()
 
-	configuration {"linux-*"}
+	configuration {}
 		defines { "BGFX_CONFIG_RENDERER_OPENGL=31" }
 	
 	configuration { "vs20*" }
