@@ -10,7 +10,9 @@ if _ACTION == "gmake" then
 end
 
 local BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
+local BIMG_DIR = path.getabsolute(path.join(BGFX_DIR, "../bimg"))
 local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
+local GLSLANG = path.join(BGFX_DIR, "3rdparty/glslang")
 local LOCATION = "tmp/" .. IDE
 local BINARY_DIR = path.join(LOCATION, "bin") .. "/"
 
@@ -198,11 +200,11 @@ function defaultConfigurations()
 	configuration {}
 
 	local platforms = {}
-	platforms["windows"] = {x64 = "win64", x32 = "win32"}
-	platforms["linux"] = {x64 = "linux64", x32 = "linux32"}
-	platforms["android-x86"] = {x64 = "android-x86", x32 = "android-x86"}
+	platforms["windows"] = {x64 = "win64"}
+	platforms["linux"] = {x64 = "linux64"}
+	platforms["android-x86"] = {x64 = "android-x86" }
 	
-	for _, platform_bit in ipairs({ "x64", "x32" }) do
+	for _, platform_bit in ipairs({ "x64" }) do
 		for platform, platform_dirs in pairs(platforms) do
 			local platform_dir = platform_dirs[platform_bit]
 			configuration {platform_bit, platform, "Debug"}
@@ -354,7 +356,7 @@ solution "LumixEngine_3rdparty"
 	end
 
 	configurations { "Debug", "Release", "RelWithDebInfo" }
-	platforms { "x32", "x64" }
+	platforms { "x64" }
 	flags { "NoPCH" }
 	location(LOCATION) 
 	language "C++"
@@ -557,6 +559,7 @@ project "shaderc"
 	}
 
 	defines{
+		"BGFX_CONFIG_USE_TINYSTL=0",
 		"getUniformTypeName=getUniformTypeName_shaderc",
 		"nameToUniformTypeEnum=nameToUniformTypeEnum_shaderc",
 		"s_uniformTypeName=s_uniformTypeName_shaderc"
@@ -622,6 +625,7 @@ project "shaderc"
 
 	includedirs {
 		path.join(BX_DIR, "include"),
+		path.join(BIMG_DIR, "include"),
 		path.join(BGFX_DIR, "include"),
 
 		path.join(BGFX_DIR, "3rdparty/dxsdk/include"),
@@ -632,7 +636,23 @@ project "shaderc"
 		path.join(GLSL_OPTIMIZER, "src/mapi"),
 		path.join(GLSL_OPTIMIZER, "src/glsl"),
 		
+		GLSLANG,
+
+		path.join(BGFX_DIR, "3rdparty/glslang/glslang/Public"),
+		path.join(BGFX_DIR, "3rdparty/glslang/glslang/Include"),
+		path.join(BGFX_DIR, "3rdparty/glslang"),
+
+		path.join(GLSL_OPTIMIZER, "include"),
+		path.join(GLSL_OPTIMIZER, "src/glsl"),
+
 		path.join(BGFX_DIR, "tools/shaderc"),
+	}
+
+	defines { -- fcpp
+		"NINCLUDE=64",
+		"NWORK=65536",
+		"NBUFF=65536",
+		"OLD_PREPROCESSOR=0",
 	}
 
 	files {
@@ -649,7 +669,9 @@ project "shaderc"
 		path.join(FCPP_DIR, "cpp5.c"),
 		path.join(FCPP_DIR, "cpp6.c"),
 		path.join(FCPP_DIR, "cpp6.c"),
+	}
 
+	files { -- glsl-optimizer
 		path.join(GLSL_OPTIMIZER, "src/mesa/**.c"),
 		path.join(GLSL_OPTIMIZER, "src/glsl/**.cpp"),
 		path.join(GLSL_OPTIMIZER, "src/mesa/**.h"),
@@ -658,6 +680,67 @@ project "shaderc"
 		path.join(GLSL_OPTIMIZER, "src/glsl/**.h"),
 		path.join(GLSL_OPTIMIZER, "src/util/**.c"),
 		path.join(GLSL_OPTIMIZER, "src/util/**.h"),
+	}
+
+	removefiles {
+		path.join(GLSL_OPTIMIZER, "src/glsl/glcpp/glcpp.c"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/glcpp/tests/**"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/glcpp/**.l"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/glcpp/**.y"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/ir_set_program_inouts.cpp"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/main.cpp"),
+		path.join(GLSL_OPTIMIZER, "src/glsl/builtin_stubs.cpp"),
+	}
+
+	removefiles { -- this is included in lumixengine's custom error.cpp
+		path.join(BGFX_DIR, "tools/shaderc/shaderc.cpp"),
+		path.join(BGFX_DIR, "tools/shaderc/shaderc_hlsl.cpp"),
+		path.join(BGFX_DIR, "tools/shaderc/shaderc_glsl.cpp"),
+		path.join(BGFX_DIR, "tools/shaderc/shaderc_spirv.cpp")
+	}
+
+	-- glslang
+	files {
+		path.join(GLSLANG, "glslang/**.cpp"),
+		path.join(GLSLANG, "glslang/**.h"),
+
+		path.join(GLSLANG, "hlsl/**.cpp"),
+		path.join(GLSLANG, "hlsl/**.h"),
+
+		path.join(GLSLANG, "SPIRV/**.cpp"),
+		path.join(GLSLANG, "SPIRV/**.h"),
+
+		path.join(GLSLANG, "OGLCompilersDLL/**.cpp"),
+		path.join(GLSLANG, "OGLCompilersDLL/**.h"),
+	}
+
+	removefiles {
+		path.join(GLSLANG, "glslang/OSDependent/Unix/main.cpp"),
+		path.join(GLSLANG, "glslang/OSDependent/Windows/main.cpp"),
+	}
+
+	configuration { "windows" }
+		removefiles {
+			path.join(GLSLANG, "glslang/OSDependent/Unix/**.cpp"),
+			path.join(GLSLANG, "glslang/OSDependent/Unix/**.h"),
+		}
+
+	configuration { "not windows" }
+		removefiles {
+			path.join(GLSLANG, "glslang/OSDependent/Windows/**.cpp"),
+			path.join(GLSLANG, "glslang/OSDependent/Windows/**.h"),
+		}
+
+
+	files { -- fcpp
+		path.join(FCPP_DIR, "**.h"),
+		path.join(FCPP_DIR, "cpp1.c"),
+		path.join(FCPP_DIR, "cpp2.c"),
+		path.join(FCPP_DIR, "cpp3.c"),
+		path.join(FCPP_DIR, "cpp4.c"),
+		path.join(FCPP_DIR, "cpp5.c"),
+		path.join(FCPP_DIR, "cpp6.c"),
+		path.join(FCPP_DIR, "cpp6.c"),
 	}
 
 	excludes {
@@ -684,12 +767,12 @@ project "bgfx"
 	defaultConfigurations()
 
 	configuration {}
-		defines { "BGFX_CONFIG_RENDERER_OPENGL=31" }
+		defines { 
+		"BGFX_CONFIG_RENDERER_OPENGL=31",
+		"BGFX_CONFIG_USE_TINYSTL=0"  
+	}
 	
 	configuration { "vs20*" }
-		BGFX_DIR = path.getabsolute("../3rdparty/bgfx")
-		local BX_DIR = path.getabsolute(path.join(BGFX_DIR, "../bx"))
-
 		buildoptions {
 			"/Oy-",
 			"/Ob2"
@@ -729,28 +812,37 @@ project "bgfx"
 		}
 		
 	configuration {}
-
-	
 	
 	includedirs {
 		path.join(BGFX_DIR, "3rdparty"),
 		path.join(BGFX_DIR, "../bx/include"),
+		path.join(BGFX_DIR, "../bimg/include"),
 		path.join(BGFX_DIR, "3rdparty/khronos"),
-		path.join(BGFX_DIR, "include")
+		path.join(BIMG_DIR, "3rdparty"),
+		path.join(BGFX_DIR, "include"),
+		path.join(BX_DIR, "include"),
+		path.join(BIMG_DIR, "include/**.h"),
 	}
 
 	files {
 		path.join(BGFX_DIR, "include/**.h"),
 		path.join(BGFX_DIR, "src/**.cpp"),
 		path.join(BGFX_DIR, "src/**.h"),
+		path.join(BIMG_DIR, "src/**.cpp"),
+		path.join(BIMG_DIR, "src/**.h"),
+		path.join(BIMG_DIR, "include/**.h"),
+		path.join(BX_DIR, "src/**.cpp"),
+		path.join(BX_DIR, "src/**.h"),
 	}
 
 	removefiles {
 		path.join(BGFX_DIR, "src/**.bin.h"),
+		path.join(BIMG_DIR, "src/image_encode.cpp"),
 	}
 
 	excludes {
 		path.join(BGFX_DIR, "src/amalgamated.**"),
+		path.join(BX_DIR, "src/amalgamated.**"),
 	}
 
 	configuration { "Debug" }

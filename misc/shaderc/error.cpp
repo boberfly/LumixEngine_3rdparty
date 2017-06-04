@@ -33,4 +33,7 @@ void printError(FILE* file, const char* format, ...)
 #include "shaderc.cpp"
 #include "shaderc_hlsl.cpp"
 #include "shaderc_glsl.cpp"
+#define g_allocator g_shaderc_allocator
+#include "shaderc_spirv.cpp"
 #undef fprintf
+#include "bx/allocator.h"
