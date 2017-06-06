@@ -714,6 +714,20 @@ project "shaderc"
 		path.join(GLSLANG, "OGLCompilersDLL/**.h"),
 	}
 
+	excludes { -- temporarily removed - it make the static lib huge
+		path.join(GLSLANG, "glslang/**.cpp"),
+		path.join(GLSLANG, "glslang/**.h"),
+
+		path.join(GLSLANG, "hlsl/**.cpp"),
+		path.join(GLSLANG, "hlsl/**.h"),
+
+		path.join(GLSLANG, "SPIRV/**.cpp"),
+		path.join(GLSLANG, "SPIRV/**.h"),
+
+		path.join(GLSLANG, "OGLCompilersDLL/**.cpp"),
+		path.join(GLSLANG, "OGLCompilersDLL/**.h"),
+	}
+
 	removefiles {
 		path.join(GLSLANG, "glslang/OSDependent/Unix/main.cpp"),
 		path.join(GLSLANG, "glslang/OSDependent/Windows/main.cpp"),

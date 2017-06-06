@@ -34,6 +34,13 @@ void printError(FILE* file, const char* format, ...)
 #include "shaderc_hlsl.cpp"
 #include "shaderc_glsl.cpp"
 #define g_allocator g_shaderc_allocator
-#include "shaderc_spirv.cpp"
+//#include "shaderc_spirv.cpp"
+namespace bgfx 
+{
+	bool compileSPIRVShader(bx::CommandLine& _cmdLine, uint32_t _version, const std::string& _code, bx::WriterI* _writer)
+	{
+		return false;
+	}
+}
 #undef fprintf
 #include "bx/allocator.h"
