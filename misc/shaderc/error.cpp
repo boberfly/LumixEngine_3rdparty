@@ -30,6 +30,7 @@ void printError(FILE* file, const char* format, ...)
 
 
 #define fprintf printError
+#define main lumix_shaderc_main
 #include "shaderc.cpp"
 #include "shaderc_hlsl.cpp"
 #include "shaderc_glsl.cpp"

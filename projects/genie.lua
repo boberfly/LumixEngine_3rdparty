@@ -256,7 +256,7 @@ solution "LumixEngine_3rdparty"
 				"-Wundef",
 			}
 			buildoptions_cpp {
-				"-std=c++11",
+				"-std=c++14",
 			}
 			linkoptions {
 				"-no-canonical-prefixes",
@@ -454,7 +454,7 @@ project "cmft"
 	
 	configuration { "not windows" }
 		buildoptions_cpp {
-			"-std=c++11",
+			"-std=c++14",
 		}
 
 	configuration {}
@@ -598,8 +598,8 @@ project "shaderc"
 		buildoptions {
 			"-fno-strict-aliasing", -- glsl-optimizer has bugs if strict aliasing is used.
 			"-Wno-unused-parameter",
-			"-std=c++11"
 		}
+		buildoptions_cpp { "-std=c++14" }
 		removebuildoptions {
 			"-Wshadow", -- glsl-optimizer is full of -Wshadow warnings ignore it.
 		}
@@ -827,9 +827,8 @@ project "bgfx"
 
 	configuration {"linux"}
 		buildoptions_cpp {
-			"-std=c++11"
+			"-std=c++14"
 		}
-
 		
 	configuration {}
 
