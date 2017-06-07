@@ -824,9 +824,15 @@ project "bgfx"
 			path.join(BX_DIR, "include/compat/msvc"),
 			path.join(BGFX_DIR, "3rdparty/dxsdk/include"),
 		}
+
+	configuration {"linux"}
+		buildoptions_cpp {
+			"-std=c++11"
+		}
+
 		
 	configuration {}
-	
+
 	includedirs {
 		path.join(BGFX_DIR, "3rdparty"),
 		path.join(BGFX_DIR, "../bx/include"),
