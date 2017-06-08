@@ -223,7 +223,8 @@ solution "LumixEngine_3rdparty"
 	
 		configuration { "linux-*" }
 			linkoptions { "-fPIC" }
-	
+			defines { "_GLIBCXX_USE_CXX11_ABI=0" }
+
 		configuration { "android-*" }
 			flags {
 				"NoImportLib",
